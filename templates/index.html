@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di Nomi File Puliti — Trasforma un testo in un nome file valido</title>
+    <meta name="description" content="Pulisci e trasforma qualsiasi testo in un nome file compatibile con Windows, macOS e Linux. Regole personalizzabili: spazi, caratteri speciali, lunghezza, prefisso e suffisso. Anteprima live e copia con un clic.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://cristianporco.it/app/cleanfile/">
+    <base href="./">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Generatore di Nomi File Puliti">
+    <meta property="og:description" content="Pulisci e trasforma un testo in un nome file valido per ogni sistema operativo. Regole personalizzabili e anteprima live.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cristianporco.it/app/cleanfile/">
+    <meta property="og:locale" content="it_IT">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Generatore di Nomi File Puliti",
+      "url": "https://cristianporco.it/app/cleanfile/",
+      "description": "Pulisce e trasforma un testo in un nome file valido per Windows, macOS e Linux.",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0" }
+    }
+    </script>
+
+    <style>
+        /* ── Reset & token ───────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg:        #F4F6F9;
+            --color-surface:   #FFFFFF;
+            --color-text:      #0F172A;
+            --color-text-muted:#475569;
+            --color-accent:    #0E7490;
+            --color-accent-hv: #155E75;
+            --color-accent-lt: #ECFEFF;
+            --color-accent-bd: #A5F3FC;
+            --color-error:     #DC2626;
+            --color-error-lt:  #FEF2F2;
+            --color-success:   #059669;
+            --color-success-lt:#ECFDF5;
+            --color-border:    #E2E8F0;
+            --color-focus:     #0E7490;
+
+            --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+
+            --space-1: 4px;   --space-2: 8px;   --space-3: 12px;
+            --space-4: 16px;  --space-5: 20px;  --space-6: 24px;
+            --space-8: 32px;  --space-10: 40px;
+
+            --radius-sm: 6px;  --radius-md: 10px;  --radius-lg: 16px;
+
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+
+            --text-xs: 0.75rem;   --text-sm: 0.875rem;
+            --text-base: 1rem;    --text-lg: 1.125rem;
+            --text-xl: 1.25rem;   --text-2xl: 1.5rem;
+            --text-3xl: 2rem;
+        }
+
+        html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            line-height: 1.6;
+            color: var(--color-text);
+            background: var(--color-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Layout ──────────────────────────────────── */
+        .container {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: var(--space-4) var(--space-4) var(--space-6);
+            flex: 1;
+        }
+
+        @media (min-width: 640px) {
+            .container { padding: var(--space-6) var(--space-6) var(--space-8); }
+        }
+
+        /* ── Header ──────────────────────────────────── */
+        .page-header {
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-5);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .page-header h1 {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: var(--color-text);
+            margin-bottom: var(--space-2);
+        }
+
+        .page-header .subtitle {
+            font-size: var(--text-lg);
+            color: var(--color-text-muted);
+            max-width: 56ch;
+            line-height: 1.5;
+        }
+
+        @media (min-width: 640px) {
+            .page-header h1 { font-size: 2.25rem; }
+        }
+
+        /* ── Main grid ───────────────────────────────── */
+        .main-content { flex: 1; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-6);
+            align-items: start;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+                gap: var(--space-8);
+            }
+        }
+
+        /* ── Panels ──────────────────────────────────── */
+        .input-panel,
+        .preview-panel {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: var(--space-5);
+        }
+
+        @media (min-width: 640px) {
+            .input-panel,
+            .preview-panel {
+                padding: var(--space-6);
+            }
+        }
+
+        /* ── Form fields ─────────────────────────────── */
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+            margin-bottom: var(--space-4);
+        }
+
+        .field label {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--color-text);
+            line-height: 1.4;
+        }
+
+        .field textarea,
+        .field input[type="text"],
+        .field input[type="number"],
+        .field select {
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            line-height: 1.5;
+            color: var(--color-text);
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            width: 100%;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 44px;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .field select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .field textarea:focus,
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--color-focus);
+            box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.15);
+        }
+
+        .field textarea::placeholder,
+        .field input::placeholder {
+            color: #94A3B8;
+        }
+
+        /* ── Field row (side by side) ────────────────── */
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+        }
+
+        @media (max-width: 399px) {
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Toggle switch ───────────────────────────── */
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-3);
+            cursor: pointer;
+            min-height: 44px;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--color-text);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin-bottom: var(--space-3);
+            width: fit-content;
+        }
+
+        .toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--color-border);
+            border-radius: 12px;
+            flex-shrink: 0;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle input:checked + .toggle-track {
+            background: var(--color-accent);
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+            transition: transform var(--transition-fast);
+        }
+
+        .toggle input:checked + .toggle-track::after {
+            transform: translateX(20px);
+        }
+
+        .toggle input:focus-visible + .toggle-track {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 3px;
+        }
+
+        /* ── Rules panel ──────────────────────────────── */
+        .rules-section {
+            margin-top: var(--space-5);
+            padding-top: var(--space-5);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .rules-section-title {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-4);
+        }
+
+        .rules-group {
+            margin-bottom: var(--space-3);
+        }
+
+        .rules-group + .rules-group {
+            padding-top: var(--space-3);
+            border-top: 1px dashed var(--color-border);
+        }
+
+        .rules-group-label {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-accent);
+            margin-bottom: var(--space-2);
+        }
+
+        /* ── Preview panel: signature element ─────────── */
+        .preview-title {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-4);
+        }
+
+        .filename-card {
+            background: var(--color-accent-lt);
+            border: 1.5px solid var(--color-accent-bd);
+            border-radius: var(--radius-md);
+            padding: var(--space-4) var(--space-5);
+            margin-bottom: var(--space-4);
+            overflow: hidden;
+        }
+
+        .path-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-family: var(--font-mono);
+            font-size: var(--text-sm);
+            line-height: 1.6;
+            flex-wrap: wrap;
+        }
+
+        .path-dir {
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            font-size: 0.8125rem;
+        }
+
+        .path-sep {
+            color: var(--color-border);
+            font-weight: 300;
+            user-select: none;
+        }
+
+        .path-filename {
+            color: var(--color-accent);
+            font-weight: 700;
+            font-size: var(--text-lg);
+            word-break: break-all;
+            transition: all var(--transition-normal);
+        }
+
+        .path-filename.is-empty {
+            color: #94A3B8;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .path-cursor {
+            color: var(--color-accent);
+            font-weight: 400;
+            animation: blink 1s step-end infinite;
+            user-select: none;
+            font-size: var(--text-lg);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .path-cursor { animation: none; opacity: 1; }
+        }
+
+        /* ── Preview details ─────────────────────────── */
+        .preview-details {
+            display: flex;
+            gap: var(--space-5);
+            margin-bottom: var(--space-5);
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .detail-label {
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: var(--color-text);
+            font-family: var(--font-mono);
+            font-size: var(--text-sm);
+            background: var(--color-bg);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* ── Copy button ──────────────────────────────── */
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: #FFFFFF;
+            background: var(--color-accent);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 12px 20px;
+            cursor: pointer;
+            min-height: 44px;
+            transition: background var(--transition-fast), transform var(--transition-fast);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .copy-btn:hover {
+            background: var(--color-accent-hv);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.97);
+        }
+
+        .copy-btn:focus-visible {
+            outline: 2px solid var(--color-focus);
+            outline-offset: 3px;
+        }
+
+        .copy-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .copy-feedback {
+            display: inline-block;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            margin-left: var(--space-3);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            vertical-align: middle;
+        }
+
+        .copy-feedback.visible { opacity: 1; }
+        .copy-feedback.success { color: var(--color-success); }
+        .copy-feedback.error   { color: var(--color-error); }
+
+        /* ── Footer ──────────────────────────────────── */
+        .page-footer {
+            margin-top: var(--space-8);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+        }
+
+        /* ── Noscript ────────────────────────────────── */
+        noscript .noscript-msg {
+            display: block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-error-lt);
+            color: var(--color-error);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1>Generatore di nomi file</h1>
+            <p class="subtitle">Incolla un testo e trasformalo in un nome file pulito, compatibile con Windows, macOS e Linux. Ogni regola è sotto il tuo controllo.</p>
+        </header>
+
+        <noscript>
+            <p class="noscript-msg">⚠️ JavaScript è necessario per l'anteprima live. Attivalo per usare il generatore.</p>
+        </noscript>
+
+        <main class="main-content" id="app">
+            <div class="grid">
+                <!-- ─── Colonna sinistra: input + regole ─── -->
+                <div class="input-panel">
+                    <div class="field">
+                        <label for="input-text">Testo da pulire</label>
+                        <textarea
+                            id="input-text"
+                            rows="5"
+                            placeholder="Incolla qui il testo che vuoi trasformare in un nome file…"
+                            autofocus
+                        ></textarea>
+                    </div>
+
+                    <div class="rules-section">
+                        <p class="rules-section-title">Regole di pulizia</p>
+
+                        <div class="rules-group">
+                            <p class="rules-group-label">Trasformazione</p>
+                            <div class="field">
+                                <label for="space-rule">Gestione spazi</label>
+                                <select id="space-rule">
+                                    <option value="dash">Sostituisci con trattino (-)</option>
+                                    <option value="underscore">Sostituisci con underscore (_)</option>
+                                    <option value="remove">Rimuovi spazi</option>
+                                    <option value="keep">Mantieni spazi</option>
+                                </select>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="remove-special">
+                                <span class="toggle-track"></span>
+                                <span>Rimuovi caratteri speciali</span>
+                            </label>
+                            <label class="toggle">
+                                <input type="checkbox" id="lowercase">
+                                <span class="toggle-track"></span>
+                                <span>Converti in minuscolo</span>
+                            </label>
+                        </div>
+
+                        <div class="rules-group">
+                            <p class="rules-group-label">Vincoli</p>
+                            <div class="field">
+                                <label for="max-length">Lunghezza massima (caratteri)</label>
+                                <input
+                                    type="number"
+                                    id="max-length"
+                                    min="1"
+                                    max="255"
+                                    placeholder="Nessun limite"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="rules-group">
+                            <p class="rules-group-label">Personalizzazione</p>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label for="prefix">Prefisso</label>
+                                    <input
+                                        type="text"
+                                        id="prefix"
+                                        placeholder="es. bozza-"
+                                    >
+                                </div>
+                                <div class="field">
+                                    <label for="suffix">Suffisso</label>
+                                    <input
+                                        type="text"
+                                        id="suffix"
+                                        placeholder="es. -rev2"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── Colonna destra: anteprima ─── -->
+                <div class="preview-panel">
+                    <p class="preview-title">Anteprima</p>
+
+                    <div class="filename-card" aria-live="polite" aria-atomic="true">
+                        <div class="path-bar">
+                            <span class="path-dir">📁 documenti</span>
+                            <span class="path-sep">/</span>
+                            <span class="path-filename" id="filename-display">nome-file</span>
+                            <span class="path-cursor" aria-hidden="true">▌</span>
+                        </div>
+                    </div>
+
+                    <div class="preview-details">
+                        <span class="detail-item">
+                            <span class="detail-label">Caratteri:</span>
+                            <span class="detail-value" id="char-count">0</span>
+                        </span>
+                    </div>
+
+                    <button class="copy-btn" id="copy-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                        Copia negli appunti
+                    </button>
+                    <span class="copy-feedback" id="copy-feedback" aria-live="polite" role="status"></span>
+                </div>
+            </div>
+        </main>
+
+        <footer class="page-footer">
+            <p>Generatore di nomi file — Compatibile con Windows, macOS e Linux</p>
+        </footer>
+    </div>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ── Elementi DOM ──────────────────────────── */
+        var inputText      = document.getElementById('input-text');
+        var spaceRule      = document.getElementById('space-rule');
+        var removeSpecial  = document.getElementById('remove-special');
+        var lowercase      = document.getElementById('lowercase');
+        var maxLength      = document.getElementById('max-length');
+        var prefixEl       = document.getElementById('prefix');
+        var suffixEl       = document.getElementById('suffix');
+        var filenameDisp   = document.getElementById('filename-display');
+        var charCount      = document.getElementById('char-count');
+        var copyBtn        = document.getElementById('copy-btn');
+        var copyFeedback   = document.getElementById('copy-feedback');
+
+        var currentFilename = '';
+        var debounceTimer   = null;
+
+        /* ── Raccogli le regole correnti ───────────── */
+        function getRules() {
+            var ml = parseInt(maxLength.value, 10);
+            return {
+                spaces:        spaceRule.value,
+                removeSpecial: removeSpecial.checked,
+                lowercase:     lowercase.checked,
+                maxLength:     Number.isFinite(ml) && ml > 0 ? ml : null,
+                prefix:        prefixEl.value,
+                suffix:        suffixEl.value
+            };
+        }
+
+        /* ── Chiama il backend e aggiorna l'anteprima ── */
+        function updatePreview() {
+            var text  = inputText.value;
+            var rules = getRules();
+
+            fetch('api/clean', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text, rules: rules })
+            })
+            .then(function (resp) {
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                return resp.json();
+            })
+            .then(function (data) {
+                currentFilename = data.filename;
+                filenameDisp.textContent = currentFilename;
+                charCount.textContent = String(currentFilename.length);
+
+                /* classe per lo stato vuoto */
+                if (currentFilename === 'untitled' && text.trim() === '') {
+                    filenameDisp.classList.add('is-empty');
+                } else {
+                    filenameDisp.classList.remove('is-empty');
+                }
+            })
+            .catch(function (err) {
+                console.error('Errore aggiornamento anteprima:', err);
+                filenameDisp.textContent = '— errore —';
+                charCount.textContent = '?';
+                filenameDisp.classList.add('is-empty');
+            });
+        }
+
+        /* ── Debounce ──────────────────────────────── */
+        function debouncedUpdate() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(updatePreview, 200);
+        }
+
+        /* ── Listener ──────────────────────────────── */
+        inputText.addEventListener('input', debouncedUpdate);
+        spaceRule.addEventListener('change', updatePreview);
+        removeSpecial.addEventListener('change', updatePreview);
+        lowercase.addEventListener('change', updatePreview);
+        maxLength.addEventListener('input', debouncedUpdate);
+        prefixEl.addEventListener('input', debouncedUpdate);
+        suffixEl.addEventListener('input', debouncedUpdate);
+
+        /* ── Copia negli appunti ───────────────────── */
+        copyBtn.addEventListener('click', function () {
+            if (!navigator.clipboard) {
+                /* fallback per contesti non sicuri */
+                var ta = document.createElement('textarea');
+                ta.value = currentFilename;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    showFeedback(true);
+                } catch (e) {
+                    showFeedback(false);
+                }
+                document.body.removeChild(ta);
+                return;
+            }
+
+            navigator.clipboard.writeText(currentFilename).then(
+                function () { showFeedback(true); },
+                function () { showFeedback(false); }
+            );
+        });
+
+        function showFeedback(success) {
+            copyFeedback.textContent = success ? 'Copiato!' : 'Errore nella copia';
+            copyFeedback.className = 'copy-feedback visible ' + (success ? 'success' : 'error');
+            clearTimeout(copyFeedback._timeout);
+            copyFeedback._timeout = setTimeout(function () {
+                copyFeedback.className = 'copy-feedback';
+            }, 2200);
+        }
+
+        /* ── Avvio iniziale ────────────────────────── */
+        updatePreview();
+    })();
+    </script>
+</body>
+</html>
