@@ -99,7 +99,7 @@ def robots():
     return (
         'User-agent: *\n'
         'Allow: /\n'
-        'Sitemap: https://cristianporco.it/app/cleanfile/sitemap.xml\n'
+        'Sitemap: https://github.com/bonciarello/cleanfile/sitemap.xml\n'
     ), 200, {'Content-Type': 'text/plain'}
 
 
@@ -109,7 +109,7 @@ def sitemap():
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         '  <url>\n'
-        '    <loc>https://cristianporco.it/app/cleanfile/</loc>\n'
+        '    <loc>https://github.com/bonciarello/cleanfile/</loc>\n'
         '    <lastmod>2026-07-09</lastmod>\n'
         '    <changefreq>monthly</changefreq>\n'
         '    <priority>0.8</priority>\n'
